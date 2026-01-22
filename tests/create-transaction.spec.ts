@@ -92,6 +92,31 @@ test.describe('RealWorldApp - Post-Login Flows', () => {
 
     // Verify that either a toast appears or the new item is visible in feed.
     await expect(page.locator('text=Created').first()).toBeVisible({ timeout: 5000 }).catch(() => {});
-    await expect(page.getByText('Created by automated test')).toBeVisible().catch(() => {});
+    // Click 'RETURN TO TRANSACTIONS' (completion screen) to go back to feed
+    const returnBtn = page.getByRole('button', { name: /return to transactions/i }).first();
+    if (await returnBtn.count() > 0) {
+      await returnBtn.click();
+    } else if (await page.getByText(/return to transactions/i).count() > 0) {
+      await page.getByText(/return to transactions/i).first().click();
+    }
+
+    // Wait for feed container to appear (grid/list) then assert new item present
+    if (await page.getByRole('grid').count() > 0) {
+      await expect(page.getByRole('grid').first()).toBeVisible({ timeout: 5000 });
+    } else if (await page.getByRole('list').count() > 0) {
+      await expect(page.getByRole('list').first()).toBeVisible({ timeout: 5000 });
+    }
+
+    // Primary check: note text should appear in feed
+    let createdFound = false;
+    try {
+      await expect(page.getByText('Created by automated test').first()).toBeVisible({ timeout: 5000 });
+      createdFound = true;
+    } catch {}
+
+    // Fallbacks: look for amount or any 'paid' text if note isn't visible
+    if (!createdFound) {
+      await expect(page.getByText(/paid|42\.50|42.5/).first()).toBeVisible({ timeout: 5000 });
+    }
   });
 });
