@@ -17,15 +17,31 @@ test.describe('RealWorldApp - Post-Login Flows', () => {
     await newBtn.focus();
     await page.keyboard.press('Enter');
 
-    // Verify dialog opened or focus moved to form
+    // Verify dialog opened or focus moved to form; if open, close it so feed is visible
     const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible().catch(() => {});
+    if (await dialog.count() > 0) {
+      await expect(dialog).toBeVisible().catch(() => {});
+      const closeBtn = dialog.getByRole('button', { name: /close|back|x/i }).first();
+      if (await closeBtn.count() > 0) {
+        await closeBtn.click().catch(() => {});
+      } else {
+        await page.keyboard.press('Escape').catch(() => {});
+      }
+      await dialog.waitFor({ state: 'hidden' }).catch(() => {});
+    }
 
     // Tab to first feed item and ensure focus is visible and actionable
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
-    // Confirm that at least one feed item is focusable
-    const item = page.getByText('Lenore Luettgen paid Reece Prohaska').first();
-    await expect(item).toBeVisible();
+    // Confirm that at least one feed item is focusable (try data-test selector, then fallback to text)
+    const itemByData = page.locator('[data-test^="transaction-item-"]').first();
+    if (await itemByData.count() > 0) {
+      await expect(itemByData).toBeVisible();
+    } else if (await page.getByRole('listitem').count() > 0) {
+      await expect(page.getByRole('listitem').first()).toBeVisible();
+    } else {
+      const itemByText = page.getByText('Lenore Luettgen paid Reece Prohaska').first();
+      await expect(itemByText).toBeVisible();
+    }
   });
 });

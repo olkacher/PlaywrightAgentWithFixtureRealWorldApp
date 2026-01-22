@@ -22,6 +22,6 @@ test.describe('RealWorldApp - Post-Login Flows', () => {
     await page.locator('[data-test="sidenav-home"]').click();
 
     // Final assertion: feed has at least one transaction item
-    await expect(page.getByText('Lenore Luettgen paid Reece Prohaska')).toBeVisible();
+    await expect(page.getByText('Lenore Luettgen paid Reece Prohaska').first()).toBeVisible();
   });
 });

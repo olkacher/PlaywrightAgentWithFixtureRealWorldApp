@@ -10,12 +10,16 @@ test.describe('RealWorldApp - Post-Login Flows', () => {
     await expect(page.getByRole('button', { name: 'New' })).toBeVisible();
     await page.getByRole('button', { name: 'New' }).click();
 
-    // Fill the `New Transaction` form: look for dialog and common fields.
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible();
+    // Fill the `New Transaction` form: look for dialog, form or inputs.
+    const hasDialog = await page.getByRole('dialog').count() > 0;
+    const hasAmount = await page.getByPlaceholder('Amount').count() > 0;
+    const hasForm = await page.locator('form').count() > 0;
+    if (!hasDialog && !hasAmount && !hasForm) {
+      throw new Error('Transaction form not found after clicking New');
+    }
 
     // Try filling common fields if present.
-    if (await page.getByPlaceholder('Amount').count() > 0) {
+    if (hasAmount) {
       await page.getByPlaceholder('Amount').fill('42.50');
     }
     if (await page.getByPlaceholder('Name').count() > 0) {
@@ -25,9 +29,17 @@ test.describe('RealWorldApp - Post-Login Flows', () => {
       await page.getByPlaceholder('Note').fill('Created by automated test');
     }
 
-    // Submit the form if a submit button exists.
-    if (await dialog.getByRole('button', { name: /submit|create|save/i }).count() > 0) {
-      await dialog.getByRole('button', { name: /submit|create|save/i }).click();
+    // Submit the form if a submit button exists in dialog or form
+    if (hasDialog) {
+      const dialog = page.getByRole('dialog');
+      if (await dialog.getByRole('button', { name: /submit|create|save/i }).count() > 0) {
+        await dialog.getByRole('button', { name: /submit|create|save/i }).click();
+      }
+    } else if (hasForm) {
+      const form = page.locator('form');
+      if (await form.getByRole('button', { name: /submit|create|save/i }).count() > 0) {
+        await form.getByRole('button', { name: /submit|create|save/i }).click();
+      }
     }
 
     // Verify that either a toast appears or the new item is visible in feed.

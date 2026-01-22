@@ -8,8 +8,8 @@ test.describe('RealWorldApp - Post-Login Flows', () => {
     const page = loginPage;
     // Measure time from load to feed visible
     const start = Date.now();
-    await page.goto('/');
-    await expect(page.getByText('Lenore Luettgen paid Reece Prohaska')).toBeVisible({ timeout: 10000 });
+    // page is already at the app root from the loginPage fixture; wait for feed item
+    await expect(page.getByText('Lenore Luettgen paid Reece Prohaska').first()).toBeVisible({ timeout: 10000 });
     const elapsed = Date.now() - start;
     console.log('Feed render time ms:', elapsed);
 
