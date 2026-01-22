@@ -35,23 +35,27 @@ test.describe('RealWorldApp - Post-Login Flows', () => {
         throw new Error('Transaction flow did not start after clicking New');
       }
 
-      // Choose the first contact available
+      // Choose the first contact available (click the name/listitem to open Payment dialog)
       if (contactsListVisible) {
-        const firstContact = page.getByRole('list').first().locator('role=listitem').first();
-        // fallback: click first listitem by locator
-        if (await firstContact.count() > 0) {
-          await firstContact.click();
-        } else {
-          await page.getByRole('list').first().getByRole('listitem').first().click();
-        }
+        // click the first listitem representing a contact
+        await page.getByRole('listitem').first().click();
+        // after clicking a contact the Payment step/dialog should appear; wait for amount input
+        await page.getByPlaceholder('Amount').first().waitFor({ state: 'visible', timeout: 5000 });
       } else if (selectVisible) {
         // If header only, try clicking a contact by name if present
         if (await page.getByText('Reece Prohaska').count() > 0) {
           await page.getByText('Reece Prohaska').first().click();
+          await page.getByPlaceholder('Amount').first().waitFor({ state: 'visible', timeout: 5000 });
         } else {
-          // as a last resort click the first button in the flow
-          const btn = page.getByRole('button').first();
-          if (await btn.count() > 0) await btn.click();
+          // as a last resort click the first list item
+          if (await page.getByRole('listitem').count() > 0) {
+            await page.getByRole('listitem').first().click();
+            await page.getByPlaceholder('Amount').first().waitFor({ state: 'visible', timeout: 5000 });
+          } else {
+            // fallback: click the first button in the flow
+            const btn = page.getByRole('button').first();
+            if (await btn.count() > 0) await btn.click();
+          }
         }
       }
 
