@@ -1,0 +1,23 @@
+// spec: specs/RealWorldApp-after-login.plan.md
+// seed: tests/seed.spec.ts
+
+import { test, expect } from './fixture/loginPage';
+
+test.describe('RealWorldApp - Post-Login Flows', () => {
+  test('Performance / Load Smoke (Feed Rendering)', async ({ loginPage }) => {
+    const page = loginPage;
+    // Measure time from load to feed visible
+    const start = Date.now();
+    await page.goto('/');
+    await expect(page.getByText('Lenore Luettgen paid Reece Prohaska')).toBeVisible({ timeout: 10000 });
+    const elapsed = Date.now() - start;
+    console.log('Feed render time ms:', elapsed);
+
+    // Scroll through feed to observe rendering
+    await page.mouse.wheel(0, 800);
+    await page.mouse.wheel(0, 800);
+
+    // Check console for errors (best-effort)
+    // (Note: Playwright test runner can be extended to capture console messages.)
+  });
+});
