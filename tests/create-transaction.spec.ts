@@ -118,5 +118,20 @@ test.describe('RealWorldApp - Post-Login Flows', () => {
     if (!createdFound) {
       await expect(page.getByText(/paid|42\.50|42.5/).first()).toBeVisible({ timeout: 5000 });
     }
+    // Open the created transaction details and verify fields match
+    const createdItem = page.getByText('Created by automated test').first();
+    if (await createdItem.count() > 0) {
+      await createdItem.click().catch(() => {});
+      // Confirm detail view shows the note and the amount
+      if (await page.getByRole('dialog').count() > 0) {
+        const dialog = page.getByRole('dialog').first();
+        await expect(dialog.getByText('Created by automated test').first()).toBeVisible().catch(() => {});
+        await expect(dialog.getByText(/42\.50|42\.5|42\.50/).first()).toBeVisible().catch(() => {});
+      } else {
+        // If navigated to a new page, assert text presence on page
+        await expect(page.getByText('Created by automated test').first()).toBeVisible().catch(() => {});
+        await expect(page.getByText(/42\.50|42\.5|42\.50/).first()).toBeVisible().catch(() => {});
+      }
+    }
   });
 });

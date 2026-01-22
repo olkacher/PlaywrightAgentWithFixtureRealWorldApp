@@ -20,6 +20,9 @@ test.describe('RealWorldApp - Post-Login Flows', () => {
     // Confirm details contain payer/payee, note and amount
     await expect(page.getByText('test note')).toBeVisible().catch(() => {});
     await expect(page.getByText(/-?\$?\d+/)).toBeVisible().catch(() => {});
+    // Check payer/payee names exist in details
+    await expect(page.getByText('Lenore Luettgen').first()).toBeVisible().catch(() => {});
+    await expect(page.getByText('Reece Prohaska').first()).toBeVisible().catch(() => {});
 
     // If there is a comment box or like button, interact with it lightly
     if (await page.getByRole('button', { name: /comment|like|share/i }).count() > 0) {

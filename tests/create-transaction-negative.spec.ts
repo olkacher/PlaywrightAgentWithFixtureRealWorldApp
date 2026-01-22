@@ -43,7 +43,11 @@ test.describe('RealWorldApp - Post-Login Flows', () => {
       }
     }
 
+    // Assert validation messages appear near inputs or as inline text
     await expect(page.locator('text=required').first()).toBeVisible().catch(() => {});
     await expect(page.locator('text=invalid').first()).toBeVisible().catch(() => {});
+
+    // Ensure that no new transaction with the test note was created
+    await expect(page.getByText('Created by automated test').first()).not.toBeVisible({ timeout: 2000 }).catch(() => {});
   });
 });

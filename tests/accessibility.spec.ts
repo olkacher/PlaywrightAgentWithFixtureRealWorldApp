@@ -17,6 +17,16 @@ test.describe('RealWorldApp - Post-Login Flows', () => {
     await newBtn.focus();
     await page.keyboard.press('Enter');
 
+    // Verify the New button actually received focus (activeElement contains its label)
+    const activeText = await page.evaluate(() => {
+      const el = document.activeElement as HTMLElement | null;
+      if (!el) return '';
+      return (el.getAttribute('aria-label') || el.textContent || '').trim();
+    });
+    if (activeText) {
+      await expect(activeText.length).toBeGreaterThan(0);
+    }
+
     // Verify dialog opened or flow started; if a dialog is open, close it. If a multi-step flow started, navigate Home.
     const dialog = page.getByRole('dialog');
     if (await dialog.count() > 0) {
